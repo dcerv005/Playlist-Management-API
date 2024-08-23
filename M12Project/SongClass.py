@@ -10,21 +10,23 @@ class Song:
         self.list[title]={"title": title, "artist": artist, "genre": genre}
         return f"{title} was added."
 
-   def update_song(self, title, change):
+   def update_song(self, title, updated_data):
       if title not in self.list:
          return "Song does not exist"
-      new= input(f"What will you like to change the {change} to? ")
-     
-      if change  == 'title':
-         self.list[new] = self.list.pop(title)
-         self.list[new]['title']=new
-         return f"The {change} of the song: {title} was updated"
-      elif change == 'artist':
-         self.list[title][change]=new
-         return f"The {change} of the song: {title} was updated"
-      elif change == 'genre': 
-         self.list[title][change]=new
-         return f"The {change} of the song: {title} was updated"
+          
+      if title != updated_data['title']:
+         self.list[updated_data['title']] = self.list.pop(title)
+         self.list[updated_data['title']]['title'] = updated_data['title']
+         self.list[updated_data['title']]['artist']=updated_data['artist']
+         self.list[updated_data['title']]['genre']=updated_data['genre']
+
+         return f"Song, {updated_data['title']} updated"
+      if title == updated_data['title']:
+         self.list[updated_data['title']]['artist']=updated_data['artist']
+         self.list[updated_data['title']]['genre']=updated_data['genre']
+
+         return f"Song, {title} updated"
+
       else: 
          return "Invalid input"
 
@@ -35,9 +37,13 @@ class Song:
       else:
          return "Song does not exist"
 
-   def get_song(self):
-      title= input("Which song are you looking for? ")
-      if title in self.list:
+   def get_song(self, title):
+      
+      if title in self.list:  #linear search
          return self.list[title]
       else:
          return "Song does not exist"
+  
+   # def get_songs(self):
+      
+   #    return self.list

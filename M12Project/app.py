@@ -1,10 +1,10 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from SongClass import Song
-from PlaylistClass import PlaylistManager
+from PlaylistClass import Playlist
 
 app = Flask(__name__)
 
-playlist = PlaylistManager()
+playlist = Playlist()
 
 song= Song()
 
@@ -12,53 +12,70 @@ song= Song()
 def all_songs():
    
    return song.list
-@app.route("/create_song")
+
+@app.route("/songs", methods=['POST'])
 def add_song():
-   
-   title = input("What is the title of the new song? ")
-   artist = input("Who is the artist of the new song? ")
-   genre = input("What is the genre of the new song? ")
-   return song.create_song(title, artist, genre)
+   song_data= request.json
+   print(song_data)
+   title = song_data['title']
+   artist = song_data['artist']
+   genre = song_data['genre']
+   response = song.create_song(title, artist, genre)
+   return jsonify({'message' : response})
 
-@app.route("/update_song")
-def update_song():
-   title = input ("Which song do you want to update? ")
-   change = input("What would you like to update? (title/artist/genre) ")
-   return song.update_song(title, change)
+@app.route("/update_song/<string:title>", methods=['PUT'])
+def update_song(title):
+   song_updated_data = request.json
+   
+   return song.update_song(title, song_updated_data)
 
-@app.route("/get_song")
-def get_song():
+@app.route("/songs/<string:title>", methods=['GET'])
+def get_song(title):
    
    
-   return song.get_song()
+   return jsonify(song.get_song(title))
 
-@app.route("/delete_song")
-def delete_song():
-   title = input ("Which song do you want to delete? ")
+@app.route("/delete_song/<string:title>", methods=['DELETE'])
+def delete_song(title):
+   
    return song.delete_song(title)
 
-@app.route("/create_playlist")
+@app.route("/create_playlist", methods=['POST'])
 def create_playlist():
+   playlist_name=request.json
    
-   new_song= song.get_song()
-   return playlist.add_song(new_song)
+   return playlist.create_playlist(playlist_name)
 
-@app.route("/modify_playlist")
-def modify_playlist():
-   change= input("Would you like to add or delete a song? ")
-   if change == 'add':
-      new_song= song.get_song()
-      return playlist.add_song(new_song)
-   elif change == 'delete':
-      title = input("Which song do you wish to delete?(title only) ")
-      if playlist.delete_song(title):
-         return f"Song: {title} was deleted from the playlist"
-   else:
-      return "Please enter either add or delete."
+@app.route("/playlist/<string:playlist_name>", methods=['GET'])
+def get_playlist(playlist_name):
    
-@app.route("/get_playlist")
-def get_playlist():
-   return playlist.get_playlist()
+   
+   return jsonify(playlist.get_playlist(playlist_name))
+
+@app.route("/add_to_playlist", methods=['POST'])
+def add_song_to_playlist():
+   playlist_data=request.json
+   song_name = playlist_data["song_name"]
+   adding_song=song.get_song(song_name)
+   playlist_name = playlist_data["playlist_name"]
+   
+   return jsonify(playlist.add_song(playlist_name, adding_song))
+
+@app.route("/remove_from_playlist", methods=['DELETE'])
+def remove_from_playlist():
+   remove_data=request.json
+   playlist_name = remove_data['playlist']
+   song_name= remove_data['song_name']
+   return jsonify(playlist.delete_song(playlist_name, song_name))
+
+@app.route("/delete_playlist/<string:playlist_name>", methods=['DELETE'])
+def delete_playlist(playlist_name):
+
+   return playlist.delete_playlist(playlist_name)
+
+
+   
+
       
 
 
